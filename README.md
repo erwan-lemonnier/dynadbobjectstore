@@ -2,6 +2,12 @@
 
 Store and retrieve python objects stored in a DynamoDB table.
 
+## Installing
+
+```
+pip install dynadbobjectstore
+```
+
 ## Synopsis
 
 ```
