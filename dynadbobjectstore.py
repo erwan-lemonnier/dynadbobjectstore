@@ -1,5 +1,7 @@
 import logging
 import json
+from boto.dynamodb2.table import Table
+from boto.dynamodb2.fields import HashKey
 
 
 log = logging.getLogger(__name__)
@@ -15,9 +17,10 @@ class InvalidParameterException(DynaDBObjectStoreException):
 class ObjectStore(object):
 
     def __init__(self, aws_conn, table_name, to_string=json.dumps, from_string=json.loads):
-        if not aws_conn or 'Prout' not in str(type(aws_conn)):
+        if not aws_conn or '.DynamoDBConnection' not in str(type(aws_conn)):
             raise InvalidParameterException("Expecting an instance of boto DynamoDB connection")
         self.aws_conn = aws_conn
+        self.table_name = table_name
         self.to_string = to_string
         self.from_string = from_string
 
@@ -25,8 +28,25 @@ class ObjectStore(object):
         """Create the DynamoDB table used by this ObjectStore, only if it does
         not already exists.
         """
-        pass
 
+        all_tables = self.aws_conn.list_tables()['TableNames']
+
+        if self.table_name in all_tables:
+            log.info("Table %s already exists" % self.table_name)
+        else:
+            log.info("Table %s does not exist: creating it" % self.table_name)
+
+            table_profiles = Table.create(
+                self.table_name,
+                schema=[
+                    HashKey('name')
+                ],
+                throughput={
+                    'read': 10,
+                    'write': 10,
+                },
+                connection=self.aws_conn,
+            )
 
     def put(self, key, value):
         """Marshall the python object given as 'value' into a string, using the

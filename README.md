@@ -2,6 +2,9 @@
 
 Store and retrieve python objects stored in a DynamoDB table.
 
+Serialize objects as json strings by default, though you can specify your own
+de/serializing methods.
+
 ## Installing
 
 ```
@@ -11,42 +14,44 @@ pip install dynadbobjectstore
 ## Synopsis
 
 ```
-from dynadbobjectstore import ObjectStore
-
 from boto import dynamodb2
+from dynadbobjectstore import ObjectStore
 
 aws_conn = dynamodb2.connect_to_region(...)
 
 # Initialize an ObjectStore using json serialization as default
-s = S3ImageResizer(
+store = ObjectStore(
     aws_conn,
     'some_table_name'
 )
 
+# Create the table if needed
+store.create_table()
+
 # Store an object
 a = {'a': 1, 'b': [1, 2, 3]}
-s.put('mykey', a)
+store.put('mykey', a)
 
 # Retrieve it
-aa = s.get('mykey')
+aa = store.get('mykey')
 
 # Delete it
-s.delete('mykey')
+store.delete('mykey')
 
 # No object returns None
-assert not s.get('foobar')
+assert not store.get('foobar')
 ```
 
 To use custom to/from string serializer:
 
 ```
 def myobject_to_str(o):
-    ...
+    return json.dumps(o)
 
 def str_to_myobject(s):
-    ...
+    return json.loads(o)
 
-s = S3ImageResizer(
+s = ObjectStore(
     aws_conn,
     'some_table_name',
     to_string=myobject_to_str,

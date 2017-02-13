@@ -39,6 +39,7 @@ setup(
         'boto',
     ],
     tests_require=[
+        'boto',
     ],
     test_suite='nose.collector',
     py_modules=['dynadbobjectstore'],
