@@ -83,3 +83,4 @@ class ObjectStore(object):
         """If this key exists, delete it"""
         self._get_table()
         self.table.delete_item(key=key)
+        log.debug("Deleted item at key '%s'" % (key))

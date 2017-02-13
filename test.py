@@ -15,6 +15,7 @@ import json
 import logging
 from unittest import TestCase
 from boto import dynamodb2
+from boto.dynamodb2.exceptions import ItemNotFound
 from dynadbobjectstore import ObjectStore
 
 # Setup logging
@@ -43,17 +44,17 @@ class Test(TestCase):
             aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY']
         )
 
+        # Create both dynamodb table and ObjectStore
         self.store = ObjectStore(conn, 'objectstore-test-table--delete-at-will')
+        self.store.create_table()
 
-    def test_put_get(self):
+
+    def test_put_get_delete(self):
 
         if not hasattr(self, 'store'):
             return
 
-        # Create the store table if it does not already exists
-        self.store.create_table()
-
-        # Store a dict
+        # Store then retrieve a dict
         o = {
             'whatever': ['dois', 33, 'mtocare?'],
             'foo': 12123,
@@ -63,3 +64,18 @@ class Test(TestCase):
         oo = self.store.get('aname')
 
         self.assertDictEqual(o, oo)
+
+        # Now delete it
+        self.store.delete('aname')
+
+
+    def test_get_non_existing_item(self):
+        # Should raise an ItemNotFound exception
+        def shouldfail():
+            self.store.get('foobar')
+        self.assertRaises(ItemNotFound, shouldfail)
+
+
+    def test_delete_non_existing_item(self):
+        # No exception expected...
+        self.store.delete('foobar')
