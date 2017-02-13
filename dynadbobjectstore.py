@@ -23,6 +23,7 @@ class ObjectStore(object):
         self.table_name = table_name
         self.to_string = to_string
         self.from_string = from_string
+        self.table = None
 
     def create_table(self):
         """Create the DynamoDB table used by this ObjectStore, only if it does
@@ -36,10 +37,10 @@ class ObjectStore(object):
         else:
             log.info("Table %s does not exist: creating it" % self.table_name)
 
-            table_profiles = Table.create(
+            self.table = Table.create(
                 self.table_name,
                 schema=[
-                    HashKey('name')
+                    HashKey('key')
                 ],
                 throughput={
                     'read': 10,
@@ -48,20 +49,37 @@ class ObjectStore(object):
                 connection=self.aws_conn,
             )
 
+    def _get_table(self):
+        if not self.table:
+            self.table = Table(self.table_name, connection=self.aws_conn)
+
     def put(self, key, value):
         """Marshall the python object given as 'value' into a string, using the
         to_string marshalling method passed in the constructor, and store it in
         the DynamoDB table under key 'key'.
         """
-        pass
+        self._get_table()
+        s = self.to_string(value)
+        log.debug("Storing in key '%s' the object: '%s'" % (key, s))
+        self.table.put_item(
+            data={
+                'key': key,
+                'value': s,
+            },
+            overwrite=True
+        )
 
     def get(self, key):
         """Get the string representation of the object stored in DynamoDB under this key,
         convert it back to an object using the 'from_string' unmarshalling method passed
         in the constructor and return the object. Return None if no object found.
         """
-        pass
+        self._get_table()
+        s = self.table.get_item(key=key)
+        log.debug("Retrieved from key '%s' the object: '%s'" % (key, s['value']))
+        return self.from_string(s['value'])
 
     def delete(self, key):
         """If this key exists, delete it"""
-        pass
+        self._get_table()
+        self.table.delete_item(key=key)

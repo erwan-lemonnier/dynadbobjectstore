@@ -58,3 +58,14 @@ s = ObjectStore(
     from_string=str_to_myobject
 )
 ```
+
+## Testing
+
+```
+# Set the following environment variables:
+export AWS_DEFAULT_REGION='eu-west-1'
+export AWS_ACCESS_KEY_ID='...'
+export AWS_SECRET_ACCESS_KEY='...'
+
+nosetests test.py
+```
