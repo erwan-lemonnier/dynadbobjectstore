@@ -49,7 +49,7 @@ class Test(TestCase):
         self.store.create_table()
 
 
-    def test_put_get_delete(self):
+    def test_put_get_delete__dict(self):
 
         if not hasattr(self, 'store'):
             return
@@ -67,6 +67,24 @@ class Test(TestCase):
 
         # Now delete it
         self.store.delete('aname')
+
+
+    def test_put_get_delete__string(self):
+
+        if not hasattr(self, 'store'):
+            return
+
+        # Store then retrieve a dict
+        o = "blablabla"
+
+        self.store.put('aname2', o)
+        oo = self.store.get('aname2')
+        log.info("got: %s (%s)" % (oo, type(oo)))
+
+        self.assertEqual(o, oo)
+
+        # Now delete it
+        self.store.delete('aname2')
 
 
     def test_get_non_existing_item(self):
