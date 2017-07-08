@@ -53,7 +53,7 @@ class ObjectStore(object):
         if not self.table:
             self.table = Table(self.table_name, connection=self.aws_conn)
 
-    def put(self, key, value):
+    def put(self, key, value, overwrite=True):
         """Marshall the python object given as 'value' into a string, using the
         to_string marshalling method passed in the constructor, and store it in
         the DynamoDB table under key 'key'.
@@ -66,7 +66,7 @@ class ObjectStore(object):
                 'key': key,
                 'value': s,
             },
-            overwrite=True
+            overwrite=overwrite
         )
 
     def get(self, key):
