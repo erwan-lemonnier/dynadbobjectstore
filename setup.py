@@ -30,7 +30,7 @@ print("version: %s" % version)
 setup(
     name='dynadbobjectstore',
     version=version,
-    url='https://github.com/erwan-lemonnier/dynadbobjectstore',
+    url='https://github.com/erwan-lemonnier/dynamodbobjectstore',
     license='BSD',
     author='Erwan Lemonnier',
     author_email='erwan@lemonnier.se',
